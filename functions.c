@@ -5,6 +5,8 @@
 #include "functions.h"
 
 
+
+
 SDL_Surface * initEcran(char * titre, int largeur, int hauteur)
 {
     SDL_Surface *ecran = NULL;
@@ -124,7 +126,7 @@ void attendreTemps(int millisecondes)
     }
 }
 
-void deplacement(SDL_Rect * pos, SDL_Event event, int vitesse_x, int vitesse_y, SDL_Rect * clip, SDL_Surface *ecran, char * fichierSprite, int nbLigne, int nbColonne, int tempsAnimation)
+void deplacement(SDL_Rect * pos, SDL_Event event, int *vitesse_x, int vitesse_y, SDL_Rect * clip,SDL_Rect * clip2, SDL_Surface *ecran, char * fichierSpriteL, char * fichierSpriteR, int nbLigne, int nbColonne, int tempsAnimation, int *mvt)
 {
     if(event.type == SDL_KEYDOWN)
     {
@@ -132,29 +134,46 @@ void deplacement(SDL_Rect * pos, SDL_Event event, int vitesse_x, int vitesse_y, 
         {
             case SDLK_UP: if(pos->y>0){ pos->y -= vitesse_y / 2;} break;
             case SDLK_DOWN: if(pos->y<340){ pos->y += vitesse_y / 2;} break;
-            case SDLK_LEFT: pos->x -= vitesse_x / 2;if(pos->x<0) pos->x=-10;
-				
-				animerSprite(clip, ecran, fichierSprite, *pos, nbLigne, nbColonne, tempsAnimation); 
+            case SDLK_LEFT: *vitesse_x+=1; if (*vitesse_x>100) *vitesse_x=100;
+pos->x -= *vitesse_x ;if(pos->x<0) pos->x=-10;
+				animerSprite(clip2, ecran,fichierSpriteR, *pos, nbLigne, nbColonne, tempsAnimation); 
+				*mvt=1;
 	 			break;
-            case SDLK_RIGHT: pos->x += vitesse_x / 2;if(pos->x>540) pos->x=540;
+            case SDLK_RIGHT: *vitesse_x+=1; if (*vitesse_x>100) *vitesse_x=100;
+pos->x += *vitesse_x ;if(pos->x>540) pos->x=540;
 				
-				animerSprite(clip, ecran,fichierSprite, *pos, nbLigne, nbColonne, tempsAnimation); 		
+				animerSprite(clip, ecran, fichierSpriteL, *pos, nbLigne, nbColonne, tempsAnimation); 
+					*mvt=1;	
 				break;
-            default: break;
+        
         }
     }
+
+ if(event.type == SDL_KEYUP)
+    {
+        switch(event.key.keysym.sym)
+        {
+           
+            case SDLK_RIGHT: *vitesse_x=0;*mvt=0;						
+				break;
+case SDLK_LEFT: *vitesse_x=0;
+*mvt=0;						
+				break;
+          
+        }
+    }
+
 }
 
 
 void animerSprite(SDL_Rect * clip, SDL_Surface * surfaceBlit, char * fichierSprite, SDL_Rect position, int nbLigne, int nbColonne, int tempsAnimation)
 {
     static int i = 0;
-    blitSpriteSurSurface(surfaceBlit, fichierSprite, position, &clip[i]);
+  blitSpriteSurSurface(surfaceBlit, fichierSprite, position, &clip[i]);
     i++;
     if(i==(nbLigne*nbColonne))
         i=0;
     attendreTemps(tempsAnimation);
 }
-
  
 
